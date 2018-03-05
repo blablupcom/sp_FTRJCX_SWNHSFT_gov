@@ -49,7 +49,6 @@ def validateURL(url):
         else:
             ext = r.headers.get('Content-Type').split('/')[-1]
         validURL = r.getcode() == 200
-        print ext
         validFiletype = ext.lower() in ['csv', '.xls', 'xlsx', '.pdf', 'vnd.openxmlformats-officedocument.spreadsheetml.sheet']
         return validURL, validFiletype
     except:
