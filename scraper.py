@@ -44,13 +44,12 @@ def validateURL(url):
             count += 1
             r = urllib2.urlopen(url)
         sourceFilename = r.headers.get('Content-Disposition')
-
         if sourceFilename:
             ext = os.path.splitext(sourceFilename)[1].replace('"', '').replace(';', '').replace(' ', '')
         else:
-            ext = os.path.splitext(url)[1]
+            ext = r.headers.get('Content-Type').split('/')[-1]
         validURL = r.getcode() == 200
-        validFiletype = ext.lower() in ['.csv', '.xls', '.xlsx', '.pdf']
+        validFiletype = ext.lower() in ['csv', '.xls', '.xlsx', '.pdf']
         return validURL, validFiletype
     except:
         print ("Error validating URL.")
@@ -84,7 +83,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "FTRJCX_SWNHSFT_gov"
-url = "http://www.swft.nhs.uk/about-us/freedom-of-information/publication-scheme/what-we-spend-and-how-we-spend-it.aspx"
+url = "https://www.swft.nhs.uk/about-us/publications"
 errors = 0
 data = []
 
@@ -96,10 +95,10 @@ soup = BeautifulSoup(html, 'lxml')
 
 #### SCRAPE DATA
 
-links = soup.find('div', 'cbox-content').find_all('a')
+links = soup.find('div', 'accordion-body').find('div', 'content').find_all('a')
 for link in links:
-       if '.csv' in link['href'] or '.xls' in link['href'] or '.xlsx' in link['href'] or '.pdf' in link['href']:
-            url = 'http://www.swft.nhs.uk'+link['href']
+       if 'download_file' in link['href']:
+            url = link['href']
             try:
                 title = link.text.strip()
             except:
@@ -107,7 +106,7 @@ for link in links:
             if not title:
                 continue
             csvMth = title[:3]
-            csvYr = url.split('.')[-2][-4:]
+            csvYr = title.split()[-1]
             csvMth = convert_mth_strings(csvMth.upper())
             data.append([csvYr, csvMth, url])
 
